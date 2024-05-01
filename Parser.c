@@ -1,52 +1,59 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-static FILE *asmFile;   //Todo:*Fileにする
+static FILE *asm;   //Todo:*Fileにする
 
-void openAsm(char* asmName)
-{
-    asmFile = fopen(asmName, "r");
-    if(asmFile == NULL) {
+void openAsm(char* name) {
+    asm = fopen(name, "r");
+    if(asm == NULL) {
         perror("ファイルが存在しません\n");
     }
 }
 
-void printAsm()    //デバッグ用 fgetする
+void closeAsm(char* name) {
+    fclose(asm);
+}
+
+void printAsm()    //ファイルポインタを1つ進めコンソールに表示
 {
-    int c = getc(asmFile);
+    int c = getc(asm);
     printf("%d\n",c);
 }
 
-
-bool IgnoreSpace()  //空白や改行はポインタを進める　他はポインタを元に戻す
+void IgnoreSpace()  //空白、改行、コメントが無くなるまでファイルポインタを進める
 {
-    
-    int c;
-    c = fgetc(asmFile);
-    if(c == ' '|| c == '\t' || c == '\n') {
-        printf("detected space\n");
-        return true;
-    }
-    else if(c == '/') {
-        c = fgetc(asmFile);
-        if(c== '/') {
-            printf("detected Comment\n");
-            while ((c = fgetc(asmFile)) != EOF && c != '\n'){}
-            return true;
+    while(1)
+    {
+        int c;
+        c = fgetc(asm);
+
+        if(c == ' '|| c == '\n') {
+            printf("detected space\n");
+            continue;
         }
-        ungetc(c,asmFile);
+
+        else if(c == '/') {
+            c = fgetc(asm);
+            if(c== '/') {
+                printf("detected Comment\n");
+                while ((c = fgetc(asm)) != EOF && c != '\n'){}
+                continue;
+            }
+            ungetc(c,asm);
+        }
+        ungetc(c,asm);
+        break;
     }
-    ungetc(c,asmFile);
 }
 
 bool hasMoreCommands()
 {
     int c;
-    c = fgetc(asmFile);
+    c = fgetc(asm);
     if (c == EOF) {
         printf("detected EOF\n");
         return false;
     }
-    ungetc(c, asmFile);
+    ungetc(c, asm);
     return true;
 }
