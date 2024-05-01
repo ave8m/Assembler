@@ -1,4 +1,4 @@
-//char配列の数は適当に決定している
+//配列の数は適当に決めた
 //勉強用のためシンプルに
 //バグ処理はあまり書かない
 
@@ -14,16 +14,17 @@ int main(int argc, char *argv[])
     char hackName[64];               //実行中書き換えるので配列を使用
 
     openAsm(asmName);
-    printAsm(asmName);
 
-    //file = fopen(argv[1], "r");
-    //if(file == NULL)
-    //{
-    //    perror("ファイルが存在しません");
-    //    return 1;
-    //}
+
+    while(hasMoreCommands()){
+        IgnoreSpace();
+        if( !hasMoreCommands() ) {
+            break;
+        }
+        printAsm();
+    }
 
     //fprintf(file, "test\n");
     fclose(file);
-    printf("debug message");
+    printf("Program finished\n");
 }
