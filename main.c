@@ -1,6 +1,5 @@
-//配列の数は適当に決めた
-//勉強用のためシンプルに
-//バグ処理はあまり書かない
+//配列の数は適当に決めている
+//勉強用のためシンプルにしている
 
 
 #include <stdio.h>
@@ -16,7 +15,6 @@ int main(int argc, char *argv[])
     openAsm(asmName);
 
     while(hasMoreCommands()){
-        IgnoreSpace();
         printAsm();
     }
 

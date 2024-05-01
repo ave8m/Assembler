@@ -1,31 +1,31 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-static FILE *asm;   //Todo:*Fileにする
+static FILE* file;   //Todo:*Fileにする
 
 void openAsm(char* name) {
-    asm = fopen(name, "r");
-    if(asm == NULL) {
+    file = fopen(name, "r");
+    if(file == NULL) {
         perror("ファイルが存在しません\n");
     }
 }
 
 void closeAsm(char* name) {
-    fclose(asm);
+    fclose(file);
 }
 
-void printAsm()    //ファイルポインタを1つ進めコンソールに表示
+void printAsm()    //デバッグ用 ファイルポインタを1つ進めコンソールに表示
 {
-    int c = getc(asm);
+    int c = getc(file);
     printf("%d\n",c);
 }
 
-void IgnoreSpace()  //空白、改行、コメントが無くなるまでファイルポインタを進める
+void IgnoreSpace()
 {
     while(1)
     {
         int c;
-        c = fgetc(asm);
+        c = fgetc(file);
 
         if(c == ' '|| c == '\n') {
             printf("detected space\n");
@@ -33,27 +33,28 @@ void IgnoreSpace()  //空白、改行、コメントが無くなるまでファイルポインタを進める
         }
 
         else if(c == '/') {
-            c = fgetc(asm);
+            c = fgetc(file);
             if(c== '/') {
                 printf("detected Comment\n");
-                while ((c = fgetc(asm)) != EOF && c != '\n'){}
+                while ((c = fgetc(file)) != EOF && c != '\n'){}
                 continue;
             }
-            ungetc(c,asm);
+            ungetc(c,file);
         }
-        ungetc(c,asm);
+        ungetc(c,file);
         break;
     }
 }
 
-bool hasMoreCommands()
+bool hasMoreCommands() //コマンドが存在するか？
 {
+    IgnoreSpace(); //空白、改行、コメントが無くなるまでファイルポインタを進める
     int c;
-    c = fgetc(asm);
+    c = fgetc(file);
     if (c == EOF) {
         printf("detected EOF\n");
         return false;
     }
-    ungetc(c, asm);
+    ungetc(c, file);
     return true;
 }
