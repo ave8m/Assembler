@@ -15,16 +15,12 @@ int main(int argc, char *argv[])
 
     openAsm(asmName);
 
-
     while(hasMoreCommands()){
         IgnoreSpace();
-        if( !hasMoreCommands() ) {
-            break;
-        }
         printAsm();
     }
 
-    //fprintf(file, "test\n");
-    fclose(file);
+    closeAsm(asmName);
+
     printf("Program finished\n");
 }
