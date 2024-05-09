@@ -1,11 +1,7 @@
 //配列の数は適当に決めている
 //勉強用のためシンプルにしている
-
-
 #include <stdio.h>
 #include "Parser.c"
-
-static FILE *file;
 
 int main(int argc, char *argv[])
 {
@@ -15,10 +11,13 @@ int main(int argc, char *argv[])
     openAsm(asmName);
 
     while(hasMoreCommands()){
-        printAsm();
+        //printAsm();
+        advance();
+        commandNow=commandType();
+        printf("%d\n",(int)commandNow);
     }
 
-    closeAsm(asmName);
-
+    closeAsm();
+ 
     printf("Program finished\n");
 }

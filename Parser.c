@@ -1,27 +1,57 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-static FILE* file;   //Todo:*Fileにする
+static FILE *file;
+char advanceNow[256];
 
-void openAsm(char* name) {
+
+typedef enum{
+    A_COMMAND,
+    C_COMMAND,
+    L_COMMAND
+} Command;
+
+Command commandNow;
+
+void openAsm(char *name) {
     file = fopen(name, "r");
     if(file == NULL) {
         perror("ファイルが存在しません\n");
     }
 }
 
-void closeAsm(char* name) {
+void closeAsm() {
     fclose(file);
 }
 
-void printAsm()    //デバッグ用 ファイルポインタを1つ進めコンソールに表示
-{
+void printAsm() {    //(デバッグ用) ファイルポインタを1つ進めコンソールに表示
     int c = getc(file);
     printf("%d\n",c);
 }
 
-void IgnoreSpace()
-{
+void advance() {     //次のコマンドを読み出す
+    int i = 0;
+    char c;
+    while((c = fgetc(file)) != '\n' && c != EOF){
+        advanceNow[i] = c;
+        i++;
+    }
+    advanceNow[i] = 0;
+}
+
+Command commandType() {
+    if(advanceNow[0] == '@') {
+        return A_COMMAND;
+    }
+    else if(advanceNow[0] == '(') {
+        return L_COMMAND;
+    }
+    else {
+        return C_COMMAND;
+    }
+}
+
+void IgnoreSpace() {
     while(1)
     {
         int c;
@@ -39,15 +69,14 @@ void IgnoreSpace()
                 while ((c = fgetc(file)) != EOF && c != '\n'){}
                 continue;
             }
-            ungetc(c,file);
+            ungetc(c, file);
         }
-        ungetc(c,file);
+        ungetc(c, file);
         break;
     }
 }
 
-bool hasMoreCommands() //コマンドが存在するか？
-{
+bool hasMoreCommands(){ //コマンドが存在するか？
     IgnoreSpace(); //空白、改行、コメントが無くなるまでファイルポインタを進める
     int c;
     c = fgetc(file);
@@ -58,3 +87,4 @@ bool hasMoreCommands() //コマンドが存在するか？
     ungetc(c, file);
     return true;
 }
+
