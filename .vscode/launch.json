@@ -5,7 +5,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
-            "args": ["${workspaceFolder}/test.asm"],    //
+            "args": ["test.asm"],    //"args": ["${workspaceFolder}/test.asm"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
