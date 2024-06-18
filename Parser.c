@@ -2,30 +2,25 @@
 #include <stdbool.h>
 #include <string.h>
 
-//**FILE SYSTEM**//
-static FILE *file;
+//**FILE**//
+static FILE *file;      //.asm用のファイルストリームを準備
 
 void openAsm(char *name) {
     file = fopen(name, "r");
     if(file == NULL) {
-        perror("ファイルが存在しません\n");
+        perror("ファイルが存在しないか引数忘れ\n");
     }
 }
 
 void closeAsm() {
     fclose(file);
 }
+//**FILE END**//
 
-void printAsm() {           //(デバッグ用) ファイルポインタを1つ進めコンソールに表示
-    int c = getc(file);
-    printf("%d\n",c);
-}
-//**FILE SYSTEM END**//
+//**advance**//
+char advanceNow[256];   //「@2」 , 「D=A」など 現コマンドである1行が入る
 
-
-char advanceNow[256];   //「@2」 , 「D=A」など 1行が入る
-
-void advance() {     //次のコマンドを読み出す advanceNowに入れる
+void advance() {        //fileから次のコマンドを読み出す advanceNowに入れる
     int i = 0;
     int c;
     while((c = fgetc(file)) != '\n' && c != EOF){
@@ -34,6 +29,7 @@ void advance() {     //次のコマンドを読み出す advanceNowに入れる
     }
     advanceNow[i] = '\0';
 }
+//**advance END**//
 
 //**コマンドタイプの判別**//
 typedef enum{
@@ -55,9 +51,11 @@ Command commandType() {
         return C_COMMAND;
     }
 }
+//**コマンドタイプの判別 END**//
 
-char* symbol() {        //@XxxのXxx部分を返す
-    static char symbol[256];    // Xxxが入る
+//**文字列を返す関数**//
+char* symbol() {                //@1234の1234部分を返す
+    static char symbol[256];
     int i = 0;
     char c;
 
@@ -70,7 +68,7 @@ char* symbol() {        //@XxxのXxx部分を返す
     return symbol;
 }
 
-char* comp() {  //
+char* comp() {
     static char * ptr;
     ptr = strchr(advanceNow, '=');
     ptr += 1;
@@ -93,6 +91,7 @@ char* jump() {  //
     ptr += 1;
     return ptr;
 }
+//**文字列を返す関数 END**//
 
 void IgnoreSpace() {    //空白、改行、コメントが無くなるまでファイルポインタを進める
     while(1)
@@ -101,14 +100,14 @@ void IgnoreSpace() {    //空白、改行、コメントが無くなるまでファイルポインタを進
         c = fgetc(file);
 
         if(c == ' '|| c == '\n') {
-            //printf("detected space\n");     //デバッグ用
+            //printf("detected space\n");
             continue;
         }
 
         else if(c == '/') {
             c = fgetc(file);
             if(c== '/') {
-                //printf("detected Comment\n");   //デバッグ用
+                //printf("detected Comment\n");
                 while ((c = fgetc(file)) != EOF && c != '\n'){}
                 continue;
             }
@@ -119,15 +118,14 @@ void IgnoreSpace() {    //空白、改行、コメントが無くなるまでファイルポインタを進
     }
 }
 
-bool hasMoreCommands(){ //コマンドが存在するか？
-    IgnoreSpace(); //空白、改行、コメント無視
+bool hasMoreCommands(){     //コマンドが存在するか？
+    IgnoreSpace();          //空白、改行、コメント無視
     int c;
     c = fgetc(file);
     if (c == EOF) {
-        //printf("detected EOF\n");   //デバッグ用
+        //printf("detected EOF\n");
         return false;
     }
     ungetc(c, file);
     return true;
 }
-

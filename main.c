@@ -2,38 +2,8 @@
 //勉強用なのでシンプルにしている
 
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "Code.c"
-
-
-
-char* decToBinary(char* str) {
-    static char binary[16];
-    memset(binary, '\0', sizeof(binary));
-
-    // 2進数に変換
-    int num = atoi(str);
-
-    for (int i = 14; i >= 0; --i) {
-        binary[i] = (num % 2) == 0 ? '0':'1';
-        num /= 2;
-    }
-
-    // 負の値の場合2の補数  最も右側の'1'よりも左にある全ビットを反転する
-    if (atoi(str) < 0) {
-        for (int i = 14; i >= 0; --i) {
-            if (binary[i] == '1') {
-                while(i > 0) {
-                    --i;
-                    binary[i] = binary[i] == '0' ? '1':'0';
-                }
-                break;
-            }
-        }
-    }
-    return binary;
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -41,51 +11,61 @@ int main(int argc, char *argv[])
     char hackName[64];               //実行中書き換えるのでchar配列
     FILE *File;                     //.hack用のFileストリームを準備
 
+    //asmファイルを開く
     openAsm(asmName);
 
+    //同名.hackを用意
     char *dot = strrchr(asmName,'.');
     strncpy(hackName, asmName, dot - asmName);
+    hackName[dot - asmName] = '\0';
     strcat(hackName, ".hack");
-    
     File = fopen(hackName,"w");
-
-
 
     while(hasMoreCommands()){
 
-        char * mnemonic;       //一時的な
+        char * p;                       //いろんな事に使うcharポインタ
 
-        //printAsm();  (デバッグ用にASCIIコードでprint)
         advance();
-        //printf("%s\n",advanceNow); //現在の1行を表示
-
-
+        //printf("%s\n",advanceNow);    //現在の1行を表示
         commandNow = commandType();
-        //printf("%d\n",commandNow); //Aコマンドは0 Cコマンドは1と表示
+        //printf("%d\n",commandNow);    //Aコマンドは0 Cコマンドは1と表示
 
         if(commandNow == A_COMMAND) {   //このルーチンはcommandType()がC_COMMANDのときだけ呼ぶようにする
 
-            mnemonic = symbol();
-            mnemonic = decToBinary(mnemonic);
-            printf("bin:%s\n", mnemonic);     //@の次の数字を表示
+            p = symbol();
+            p = decToBinary(p);
+
+            //printf("bin:%s\n", p);    //@の次の数字を表示
+
+            fputs("0", File);
+            fputs(p, File);
+            fputs("\n", File);
 
 
         }
         else if(commandNow = C_COMMAND) {   //このルーチンはcommandType()がA_COMMANDのときだけ呼ぶようにする
-            mnemonic = dest();
-            mnemonic = code_dest(mnemonic);
-            printf("dest:%s\n", mnemonic);  //A=DのAを表示
+            p = comp();
+            p = code_comp(p);
 
-            mnemonic = comp();
-            mnemonic = code_comp(mnemonic);
-            printf("comp:%s\n", mnemonic);  //A=DのDを表示
+            //printf("comp:%s\n", p);       //A=DのAを表示
+
+            fputs("111", File);
+            fputs(p, File);
+
+            p = dest();
+            p = code_dest(p);
+
+            //printf("dest:%s\n", p);       //A=DのDを表示
+
+            fputs(p, File);
+            fputs("000", File);             //JMPはまだ未実装の為
+            fputs("\n", File);
 
         }
     }
 
     closeAsm();
+    fclose(File);
  
     printf("finish\n");
 }
-
-
